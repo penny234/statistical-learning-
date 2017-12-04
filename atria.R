@@ -1,3 +1,8 @@
+setwd('~/Desktop/coure project/DATA/GSM792454')
+# set working directory 
+
+
+#to read in line by line, since it only has 8 files, it is doable
 s1_LA <- read.delim("~/Desktop/coure project/DATA/GSM792454/s1_LA.txt")
 s2_LA <- read.delim("~/Desktop/coure project/DATA/GSM792454/s2_LA.txt")
 s3_LA <- read.delim("~/Desktop/coure project/DATA/GSM792454/s3_LA.txt")
@@ -11,6 +16,36 @@ s4_RA <- read.delim("~/Desktop/coure project/DATA/GSM792454/s4_RA.txt")
 GSM54_RA<-cbind(s1_RA,s2_RA[,2],s3_RA[,2],s4_RA[,2])
 colnames(GSM54_RA)<-c("Gene","s1_RA","s2_RA","s3_RA","s4_RA")
 GSM54<-data.frame(GSM54_LA,GSM54_RA[,2:5])
+######################################################################################################################
+#another way to read data by find the patterns of the file name, which is more convenient when the dataset become bigger
+myfiles<-pattern_list<-list()  
+#initalize the pattern_list as an empty list 
+for (i in 1:4){
+  pattern_list[[i]]=paste("s",i,'_LA.txt',sep="") 
+  # the pattern is si_LA.txt, using paste () to concatenate strings with integers
+  myfiles[[i]]<-list.files(pattern=pattern_list[[i]][1])
+  }
+for (i in 5:8){
+  pattern_list[[i]]=paste("s",i-4,'_RA.txt',sep="")
+  # the pattern is si_RA.txt, using paste () to concatenate strings with integers
+  myfiles[[i]]<-list.files(pattern=pattern_list[[i]][1])
+}
+# in this case the file in myfiles will be myfiles= s1_LA.txt, s2_LA.txt,s3_LA.txt,s4_LA.txt, s1_RA.txt, s2_RA.txt,s3_RA.txt,s4_RA.txt
+
+# read in data with the names in myfiles
+for (file in myfiles){
+  # if the merged dataset doesn't exist, create it
+  if (!exists("GSM54")){
+     GSM54 <- read.delim(file)
+  }
+  # if the merged dataset does exist, append to it
+  if (exists("GSM54")){
+    temp_dataset <-read.delim(file)
+    GSM54<-cbind.data.frame(dataset, temp_dataset[,2])
+    rm(temp_dataset)
+  }
+##########################################################################################################
+  
 ## try http:// if https:// URLs are not supported
 source("https://bioconductor.org/biocLite.R")
 biocLite("EBSeq")
@@ -58,5 +93,8 @@ PlotPostVsRawFC(EBOut,GeneFC)
 par(mfrow=c(1,2))
 QQP(EBOut)
 DenNHist(EBOut)
+
+  
+  
 
 
